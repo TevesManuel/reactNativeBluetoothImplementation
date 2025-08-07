@@ -7,7 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import MyHouse from './components/MyHouse/MyHouse';
-
+import { ActivityIndicator } from 'react-native'
 
 const NAME_OF_TARGET_DEVICE = "CASA-DOMOTICA"
 
@@ -21,8 +21,8 @@ export default function App() {
 
 const SafeApp = () => {
     const [device, setDevice] = useState<BluetoothDevice | null>(null);
-    const [connectedDevice, setConnectedDevice] = useState(false);
-    const [connecting, setConnecting] = useState(false);
+    const [connectedDevice, setConnectedDevice] = useState<boolean>(false);
+    const [connecting, setConnecting] = useState<boolean>(false);
 
     const sendDataToDevice = async (data: string) => {
         let isConnected = await device?.isConnected(); 
@@ -42,9 +42,9 @@ const SafeApp = () => {
     return (
         <View style={[styles.outerContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
             <LinearGradient
-                colors={['#0088BB', '#000000']} // rojo a azul
-                start={{ x: 0, y: 0 }}  // izquierda arriba
-                end={{ x: 1, y: 1 }}    // derecha abajo
+                colors={['#0088BB', '#000000']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
                 style={{ flex: 1 }}
             >
                 <ScrollView contentContainerStyle={{...styles.container, ...(connectedDevice ? {} : { flex: 1, justifyContent: 'center'})}}>
@@ -52,35 +52,37 @@ const SafeApp = () => {
                         connectedDevice ? (
                             <MyHouse />
                         ) : (
-                            <TouchableOpacity style={{backgroundColor: '#FFFFFF22'}} onPress={async () => {
-                                console.log("Click at ", Date.now())
-                                let hasPermission = await requestBluetoothPermission()
-                                if (hasPermission) {
-                                    let bluetoothEnabled = await RNBluetoothClassic.isBluetoothEnabled();
-                                    if(bluetoothEnabled) {
-                                        let devices = await RNBluetoothClassic.getBondedDevices();
-                                        console.log("devices count: ", devices.length);
-                                        devices.map(async (iterDevice) => {
-                                            if(iterDevice.name == NAME_OF_TARGET_DEVICE) {
-                                                setDevice(iterDevice);
-                                                let connected = await iterDevice.isConnected();
-                                                if(!connected) {
-                                                    setConnecting(true);
-                                                    iterDevice.connect().then((resultConnection) => {
-                                                        setConnectedDevice(resultConnection);
-                                                        setConnecting(false);
-                                                    });
+                            connecting ? <ActivityIndicator size="large" color="#fff" /> : (
+                                <TouchableOpacity style={{backgroundColor: '#FFFFFF22'}} onPress={async () => {
+                                    console.log("Click at ", Date.now())
+                                    let hasPermission = await requestBluetoothPermission()
+                                    if (hasPermission) {
+                                        let bluetoothEnabled = await RNBluetoothClassic.isBluetoothEnabled();
+                                        if(bluetoothEnabled) {
+                                            let devices = await RNBluetoothClassic.getBondedDevices();
+                                            console.log("devices count: ", devices.length);
+                                            devices.map(async (iterDevice) => {
+                                                if(iterDevice.name == NAME_OF_TARGET_DEVICE) {
+                                                    setDevice(iterDevice);
+                                                    let connected = await iterDevice.isConnected();
+                                                    if(!connected) {
+                                                        setConnecting(true);
+                                                        iterDevice.connect().then((resultConnection) => {
+                                                            setConnectedDevice(resultConnection);
+                                                            setConnecting(false);
+                                                        });
+                                                    }
+                                                    else {
+                                                        setConnectedDevice(true);
+                                                    }
                                                 }
-                                                else {
-                                                    setConnectedDevice(true);
-                                                }
-                                            }
-                                        });
+                                            });
+                                        }
                                     }
-                                }
-                            }}>
-                                <Text style={{color: 'white', padding: 20, fontSize: 30}}>Buscar casa</Text>
-                            </TouchableOpacity>
+                                }}>
+                                    <Text style={{color: 'white', padding: 20, fontSize: 30}}>Buscar casa</Text>
+                                </TouchableOpacity>
+                            )
                         )
                     }
                     </ScrollView>

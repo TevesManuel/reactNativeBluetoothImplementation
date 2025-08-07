@@ -1,17 +1,15 @@
 import HomeSVG from './../HouseSVG/HouseSVG';
 import { TouchableOpacity } from 'react-native';
 import { Alert, Text, StyleSheet } from 'react-native';
+
 const MyHouse = () => {
     return (
         <>
             <Text style={styles.title}>Mi casa</Text>
-            {[...Array(8)].map((_, i) => (
-                // <BlurView key={i} blurAmount={80} blurType="light" style={styles.box}>
-                <TouchableOpacity key={i}style={styles.box} onPress={() => {Alert.alert("Título", "Mensaje");}}>
-                    <HomeSVG width={60} height={60} />
-                    <Text style={styles.subTitle}>Dormitorio</Text>
-                </TouchableOpacity>
-            ))}
+            <TouchableOpacity style={styles.box} onPress={() => {Alert.alert("Título", "Mensaje");}}>
+                <HomeSVG width={60} height={60} />
+                <Text style={styles.subTitle}>Dormitorio</Text>
+            </TouchableOpacity>
         </>
     );
 };
