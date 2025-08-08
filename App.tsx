@@ -6,21 +6,31 @@ import { requestBluetoothPermission } from './hooks/useBluetooth'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
-import MyHouse from './components/MyHouse/MyHouse';
 import { ActivityIndicator } from 'react-native'
+import MyHouse from './components/MyHouse/MyHouse';
+import { DeviceProvider } from './context/DeviceContext';
+
+import { useContext } from 'react';
+import { DeviceContext } from './context/DeviceContext';
 
 const NAME_OF_TARGET_DEVICE = "CASA-DOMOTICA"
 
 export default function App() {
     return (
         <SafeAreaProvider>
-            <SafeApp/>
+            <DeviceProvider>
+                <SafeApp/>
+            </DeviceProvider>
         </SafeAreaProvider>
     );
 }
 
 const SafeApp = () => {
-    const [device, setDevice] = useState<BluetoothDevice | null>(null);
+    // const [device, setDevice] = useState<BluetoothDevice | null>(null);
+    const context = useContext(DeviceContext);
+    if (!context) throw new Error('DeviceContext debe usarse dentro de DeviceProvider');
+
+    const { device, setDevice } = context;
     const [connectedDevice, setConnectedDevice] = useState<boolean>(false);
     const [connecting, setConnecting] = useState<boolean>(false);
 
